@@ -7,7 +7,10 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 )
+
+var wg sync.WaitGroup
 
 func parseLine(path string) ([]string, error) {
 	file, err := os.Open(path)
@@ -65,6 +68,8 @@ func parseElblogfile(t1 *bool, t2 *bool, t3 *bool, threshold *int, debug *bool, 
 		}
 	}
 
+	wg.Done()
+
 }
 
 func main() {
@@ -84,7 +89,10 @@ func main() {
 	}
 
 	for _, fn := range flag.Args() {
-		parseElblogfile(t1, t2, t3, t, d, v, fn)
+		wg.Add(1)
+		go parseElblogfile(t1, t2, t3, t, d, v, fn)
 	}
+
+	wg.Wait()
 
 }
